@@ -116,3 +116,19 @@ app.get(/.*/, (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server chạy tại Port: ${PORT}`));
+// --- QUAN TRỌNG: CẤU HÌNH ĐƯỜNG DẪN ---
+
+// 1. Phục vụ các file tĩnh (html, css, js)
+app.use(express.static('public'));
+
+// 2. Mặc định vào trang chủ là Đăng Nhập
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 3. Các đường dẫn cụ thể (để chắc chắn không lỗi)
+app.get('/menu', (req, res) => res.sendFile(path.join(__dirname, 'public', 'menu.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server chạy tại Port: ${PORT}`));

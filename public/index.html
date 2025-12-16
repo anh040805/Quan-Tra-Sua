@@ -3,267 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trà Sữa MongoDB Cloud</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Đăng Nhập Hệ Thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #ff6b6b; --secondary: #4ecdc4; --dark: #292f36; --light: #f7fff7; }
-        body { font-family: 'Quicksand', sans-serif; background-color: var(--light); margin: 0; color: var(--dark); }
-        
-        /* HEADER */
-        .header { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px;}
-        .nav-btn { background: none; border: 2px solid var(--secondary); color: var(--secondary); padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-left: 10px;}
-        .nav-btn:hover { background: var(--secondary); color: white; }
-        .cart-btn { background: var(--primary); color: white; border: none; }
-        .cart-btn:hover { background: #ff4757; }
-
-        /* MENU GRID */
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .menu-title { text-align: center; margin-bottom: 30px; font-size: 28px; color: var(--dark); }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        
-        /* PRODUCT CARD */
-        .card { background: white; border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .card img { width: 120px; height: 120px; object-fit: contain; margin: 0 auto 15px; }
-        .card h3 { margin: 10px 0 5px; font-size: 18px; }
-        .card p { font-size: 13px; color: #666; flex-grow: 1; margin-bottom: 15px; }
-        .price { font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
-        .add-btn { width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .add-btn:hover { opacity: 0.9; }
-
-        /* MODAL (POPUP) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 15px; max-height: 85vh; overflow-y: auto; position: relative; animation: slideDown 0.3s ease; }
-        @keyframes slideDown { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
-        
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* CART & HISTORY STYLES */
-        .cart-item, .history-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .cart-total { text-align: right; font-size: 20px; font-weight: bold; margin-top: 20px; color: var(--primary); }
-        .confirm-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        
-        .history-card { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--secondary); }
-        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #ffeaa7; color: #d35400; }
+        body {
+            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Quicksand', sans-serif;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center;
+        }
+        h2 { color: #333; margin-bottom: 20px; }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0;
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            background: #764ba2; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+        button:hover { background: #5c3a82; }
+        .switch-btn {
+            background: none; color: #667eea; margin-top: 15px; font-size: 14px; text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <a href="#" class="logo">🥤 TRÀ SỮA CLOUD</a>
-        <div>
-            <button class="nav-btn" onclick="openHistoryModal()">📜 Lịch sử mua</button>
-            <button class="nav-btn cart-btn" onclick="toggleCart()">🛒 Giỏ hàng (<span id="cart-count">0</span>)</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <h2 class="menu-title">✨ Menu Hôm Nay ✨</h2>
-        <div id="product-list" class="product-grid">
-            <p style="text-align:center; width: 100%;">Đang tải dữ liệu từ MongoDB...</p>
-        </div>
-    </div>
-
-    <div id="cartModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="toggleCart()">&times;</span>
-            <h2>Giỏ Hàng Của Bạn</h2>
-            <div id="cart-items-container">
-                <p style="text-align: center; color: #999;">Chưa có món nào...</p>
-            </div>
-            <div class="cart-total">Tổng: <span id="total-price">0</span>đ</div>
-            
-            <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
-            <h3>Thông tin giao hàng</h3>
-            <div class="input-group">
-                <label>Họ tên:</label>
-                <input type="text" id="cus-name" placeholder="Ví dụ: Nguyễn Văn A">
-            </div>
-            <div class="input-group">
-                <label>Số điện thoại (để tra lịch sử):</label>
-                <input type="tel" id="cus-phone" placeholder="Ví dụ: 0909123456">
-            </div>
-            <div class="input-group">
-                <label>Địa chỉ:</label>
-                <input type="text" id="cus-address" placeholder="Ví dụ: 123 Đường ABC...">
-            </div>
-            <button class="confirm-btn" onclick="checkout()">ĐẶT HÀNG NGAY</button>
-        </div>
-    </div>
-
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeHistoryModal()">&times;</span>
-            <h2>Tra Cứu Đơn Hàng</h2>
-            <div class="input-group" style="display: flex; gap: 10px;">
-                <input type="tel" id="search-phone" placeholder="Nhập SĐT của bạn...">
-                <button onclick="searchHistory()" style="padding: 10px; background: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer;">Tìm</button>
-            </div>
-            <div id="history-results" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
-                </div>
-        </div>
+    <div class="login-box">
+        <h1 style="font-size: 40px; margin: 0;">🥤</h1>
+        <h2 id="title">Đăng Nhập</h2>
+        
+        <input type="text" id="username" placeholder="Tên đăng nhập">
+        <input type="password" id="password" placeholder="Mật khẩu">
+        <input type="text" id="fullname" placeholder="Họ và tên bạn" style="display:none">
+        
+        <button onclick="handleAuth()" id="btn-submit">ĐĂNG NHẬP</button>
+        <button class="switch-btn" onclick="toggleMode()" id="btn-switch">Chưa có tài khoản? Đăng ký ngay</button>
     </div>
 
     <script>
-        let products = [];
-        let cart = [];
+        let isLogin = true;
 
-        // 1. Tải danh sách sản phẩm
-        async function loadProducts() {
-            try {
-                const res = await fetch('/api/products');
-                products = await res.json();
-                
-                // Nếu chưa có dữ liệu thì gợi ý tạo
-                if(products.length === 0) {
-                    document.getElementById('product-list').innerHTML = 
-                        `<div style="grid-column: 1/-1; text-align: center;">
-                            <p>Menu đang trống.</p>
-                            <a href="/api/init" style="color: blue; text-decoration: underline;">Bấm vào đây để tạo Menu mẫu</a>
-                        </div>`;
-                    return;
-                }
-
-                renderProducts(products);
-            } catch (err) {
-                console.error(err);
-                document.getElementById('product-list').innerHTML = `<p style="color:red; text-align:center;">Lỗi kết nối Server!</p>`;
-            }
+        // Chuyển đổi giữa Đăng Nhập và Đăng Ký
+        function toggleMode() {
+            isLogin = !isLogin;
+            document.getElementById('title').innerText = isLogin ? "Đăng Nhập" : "Đăng Ký Khách Hàng";
+            document.getElementById('fullname').style.display = isLogin ? "none" : "block";
+            document.getElementById('btn-submit').innerText = isLogin ? "ĐĂNG NHẬP" : "ĐĂNG KÝ";
+            document.getElementById('btn-switch').innerText = isLogin ? "Chưa có tài khoản? Đăng ký ngay" : "Quay lại đăng nhập";
         }
 
-        function renderProducts(list) {
-            const container = document.getElementById('product-list');
-            container.innerHTML = list.map(p => `
-                <div class="card">
-                    <img src="${p.image}" alt="${p.name}">
-                    <h3>${p.name}</h3>
-                    <p>${p.description || 'Thơm ngon mời bạn ăn nha!'}</p>
-                    <div class="price">${p.price.toLocaleString()}đ</div>
-                    <button class="add-btn" onclick="addToCart('${p._id}')">Thêm vào giỏ +</button>
-                </div>
-            `).join('');
-        }
+        async function handleAuth() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullname').value;
 
-        // 2. Chức năng Giỏ hàng
-        function addToCart(id) {
-            const product = products.find(p => p._id === id);
-            cart.push(product);
-            updateCartUI();
-            toggleCart(true); // Mở giỏ hàng ngay khi thêm
-        }
+            if (!username || !password) return alert("Vui lòng nhập đủ thông tin!");
 
-        function removeFromCart(index) {
-            cart.splice(index, 1); // Xóa món tại vị trí index
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.length;
-            const container = document.getElementById('cart-items-container');
-            const totalSpan = document.getElementById('total-price');
-            
-            let total = 0;
-            if(cart.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">Giỏ hàng trống.</p>';
-            } else {
-                container.innerHTML = cart.map((item, index) => {
-                    total += item.price;
-                    return `
-                        <div class="cart-item">
-                            <div>
-                                <b>${item.name}</b><br>
-                                <small>${item.price.toLocaleString()}đ</small>
-                            </div>
-                            <button onclick="removeFromCart(${index})" style="background:none; border:none; color:red; cursor:pointer;">Xóa</button>
-                        </div>
-                    `;
-                }).join('');
-            }
-            totalSpan.innerText = total.toLocaleString();
-        }
-
-        function toggleCart(forceOpen = false) {
-            const modal = document.getElementById('cartModal');
-            if (forceOpen) modal.style.display = 'flex';
-            else modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        // 3. Thanh toán (Checkout)
-        async function checkout() {
-            const name = document.getElementById('cus-name').value;
-            const phone = document.getElementById('cus-phone').value;
-            const address = document.getElementById('cus-address').value;
-
-            if(cart.length === 0) return alert("Giỏ hàng đang trống!");
-            if(!name || !phone || !address) return alert("Vui lòng điền đầy đủ thông tin!");
-
-            const orderData = {
-                customerName: name,
-                phone: phone,
-                address: address,
-                items: cart,
-                totalPrice: cart.reduce((sum, item) => sum + item.price, 0)
-            };
+            const url = isLogin ? '/api/login' : '/api/register';
+            const body = isLogin ? { username, password } : { username, password, fullName };
 
             try {
-                const res = await fetch('/api/orders', {
+                const res = await fetch(url, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(orderData)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
                 });
-                const result = await res.json();
-                
-                if(result.success) {
-                    alert("✅ Đặt hàng thành công! Cảm ơn bạn.");
-                    cart = [];
-                    updateCartUI();
-                    toggleCart(); // Đóng modal
+                const data = await res.json();
+
+                if (data.success) {
+                    if (isLogin) {
+                        // --- PHÂN LUỒNG Ở ĐÂY ---
+                        alert("✅ Đăng nhập thành công!");
+                        localStorage.setItem('user', JSON.stringify({ name: data.fullName, role: data.role }));
+                        
+                        if (data.role === 'admin') {
+                            window.location.href = '/admin.html'; // Admin thì sang trang quản lý
+                        } else {
+                            window.location.href = '/menu.html';  // Khách thì sang trang đặt món
+                        }
+                    } else {
+                        alert("✅ Đăng ký thành công! Hãy đăng nhập.");
+                        toggleMode();
+                    }
                 } else {
-                    alert("Lỗi: " + result.message);
+                    alert("❌ Lỗi: " + data.message);
                 }
-            } catch (err) { alert("Lỗi kết nối!"); }
+            } catch (err) { alert("Lỗi kết nối server!"); }
         }
-
-        // 4. Lịch sử mua hàng
-        function openHistoryModal() {
-            document.getElementById('historyModal').style.display = 'flex';
-        }
-        function closeHistoryModal() {
-            document.getElementById('historyModal').style.display = 'none';
-        }
-
-        async function searchHistory() {
-            const phone = document.getElementById('search-phone').value;
-            if(!phone) return alert("Vui lòng nhập số điện thoại!");
-
-            const res = await fetch(`/api/history/${phone}`);
-            const orders = await res.json();
-            const container = document.getElementById('history-results');
-
-            if(orders.length === 0) {
-                container.innerHTML = '<p>Không tìm thấy đơn hàng nào với SĐT này.</p>';
-                return;
-            }
-
-            container.innerHTML = orders.map(order => `
-                <div class="history-card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <b>${new Date(order.createdAt).toLocaleString()}</b>
-                        <span class="status-badge">${order.status}</span>
-                    </div>
-                    <p>Món: ${order.items.map(i => i.name).join(', ')}</p>
-                    <p>Tổng tiền: <b>${order.totalPrice.toLocaleString()}đ</b></p>
-                    <small>Giao tới: ${order.address}</small>
-                </div>
-            `).join('');
-        }
-
-        // Khởi chạy
-        loadProducts();
     </script>
 </body>
 </html>
