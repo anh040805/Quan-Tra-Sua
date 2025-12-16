@@ -11,137 +11,105 @@ app.use(express.json());
 // --- CẤU HÌNH ĐƯỜNG DẪN ---
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 
 // --- KẾT NỐI MONGODB ---
-// ⚠️ Thay mật khẩu của bạn vào đây nhé
-const mongoURI = 'mongodb+srv://admin:trasua123@trasua.hycfxqc.mongodb.net/?appName=Trasua';
+// ⚠️ Thay mật khẩu của bạn vào đây
+const mongoURI = 'mongodb+srv://admin:TraSua123@trasua.hycfxqc.mongodb.net/?appName=Trasua';
 mongoose.connect(mongoURI)
     .then(() => console.log('✅ Đã kết nối MongoDB!'))
     .catch(err => console.error('❌ Lỗi DB:', err));
 
 // --- SCHEMAS (KHUÔN DỮ LIỆU) ---
-const ProductSchema = new mongoose.Schema({
-    name: String, price: Number, category: String, image: String
+// 1. Schema Tài Khoản (Mới)
+const UserSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'customer' }, // 'admin' hoặc 'customer'
+    fullName: String
 });
 
-const TableSchema = new mongoose.Schema({
-    name: String, status: { type: String, default: 'empty' } // empty, busy
-});
-
+// 2. Các Schema cũ
+const ProductSchema = new mongoose.Schema({ name: String, price: Number, category: String, image: String });
+const TableSchema = new mongoose.Schema({ name: String, status: { type: String, default: 'empty' } });
 const OrderSchema = new mongoose.Schema({
-    customerName: String,
-    totalPrice: Number,
-    items: Array,
-    tableId: String, // Nếu ăn tại bàn
-    createdAt: { type: Date, default: Date.now }
+    customerName: String, totalPrice: Number, items: Array, tableId: String, createdAt: { type: Date, default: Date.now }
 });
 
+const User = mongoose.model('User', UserSchema);
 const Product = mongoose.model('Product', ProductSchema);
 const Table = mongoose.model('Table', TableSchema);
 const Order = mongoose.model('Order', OrderSchema);
 
-// --- API KHỞI TẠO DỮ LIỆU MẪU (CHẠY 1 LẦN) ---
+// --- API KHỞI TẠO (Tự tạo Admin 123456) ---
 app.get('/api/init', async (req, res) => {
-    // 1. Tạo Menu Đa Dạng
+    // Tạo tài khoản Admin mặc định nếu chưa có
+    const adminExist = await User.findOne({ username: 'admin' });
+    if (!adminExist) {
+        await User.create({ username: 'admin', password: '123456', role: 'admin', fullName: 'Chủ Quán' });
+    }
+    
+    // Tạo Menu và Bàn (như cũ)
     await Product.deleteMany({});
     await Product.insertMany([
         { name: "Sữa Tươi Trân Châu Đường Đen", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/3081/3081162.png" },
-        { name: "Trà Sữa Truyền Thống", price: 30000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/1187/1187466.png" },
-        { name: "Trà Sữa Matcha", price: 38000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" },
         { name: "Trà Đào Cam Sả", price: 40000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/931/931949.png" },
-        { name: "Lục Trà Kim Quất", price: 35000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/3081/3081096.png" },
-        { name: "Trà Vải Hoa Hồng", price: 42000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/1047/1047503.png" },
-        { name: "Cà Phê Sữa Đá", price: 25000, category: "Cà Phê", image: "https://cdn-icons-png.flaticon.com/512/2935/2935413.png" },
-        { name: "Bạc Xỉu", price: 28000, category: "Cà Phê", image: "https://cdn-icons-png.flaticon.com/512/924/924514.png" }
+        { name: "Matcha Đá Xay", price: 45000, category: "Đá Xay", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" }
     ]);
-
-    // 2. Tạo Bàn (10 bàn)
+    
     await Table.deleteMany({});
     const tables = [];
     for(let i=1; i<=10; i++) tables.push({ name: `Bàn ${i}`, status: 'empty' });
     await Table.insertMany(tables);
 
-    // 3. Tạo Đơn Hàng Giả Lập (Để vẽ biểu đồ)
-    await Order.deleteMany({});
-    // Tạo 20 đơn ngẫu nhiên trong 7 ngày qua
-    const fakeOrders = [];
-    for(let i=0; i<20; i++) {
-        const daysAgo = Math.floor(Math.random() * 7);
-        const date = new Date();
-        date.setDate(date.getDate() - daysAgo);
-        fakeOrders.push({
-            customerName: "Khách lẻ",
-            totalPrice: Math.floor(Math.random() * 100000) + 30000,
-            items: [{name: "Trà Sữa Test", price: 30000}],
-            createdAt: date
-        });
-    }
-    await Order.insertMany(fakeOrders);
-
-    res.send("Đã khởi tạo Menu, Bàn và Dữ liệu thống kê mẫu!");
+    res.send("Đã khởi tạo: Admin (mk: 123456), Menu và Bàn!");
 });
 
-// --- CÁC API CHÍNH ---
-
-// Lấy danh sách sản phẩm
-app.get('/api/products', async (req, res) => res.json(await Product.find()));
-
-// Lấy danh sách bàn
-app.get('/api/tables', async (req, res) => res.json(await Table.find().sort({name: 1})));
-
-// Cập nhật trạng thái bàn
-app.post('/api/tables/:id', async (req, res) => {
-    await Table.findByIdAndUpdate(req.params.id, { status: req.body.status });
-    res.json({ success: true });
-});
-
-// Tạo đơn hàng mới
-app.post('/api/orders', async (req, res) => {
-    const newOrder = new Order(req.body);
-    await newOrder.save();
+// --- API XÁC THỰC (LOGIN/REGISTER) ---
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username, password });
     
-    // Nếu có chọn bàn, chuyển bàn đó thành 'busy'
-    if(req.body.tableId) {
-        await Table.findByIdAndUpdate(req.body.tableId, { status: 'busy' });
+    if (user) {
+        res.json({ success: true, role: user.role, fullName: user.fullName });
+    } else {
+        res.json({ success: false, message: "Sai tài khoản hoặc mật khẩu!" });
     }
+});
+
+app.post('/api/register', async (req, res) => {
+    const { username, password, fullName } = req.body;
+    try {
+        // Kiểm tra trùng
+        const exist = await User.findOne({ username });
+        if(exist) return res.json({ success: false, message: "Tên đăng nhập đã tồn tại!" });
+
+        await User.create({ username, password, fullName, role: 'customer' });
+        res.json({ success: true, message: "Đăng ký thành công! Hãy đăng nhập." });
+    } catch (e) {
+        res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+});
+
+// --- CÁC API KHÁC (Giữ nguyên logic cũ) ---
+app.get('/api/products', async (req, res) => res.json(await Product.find()));
+app.get('/api/tables', async (req, res) => res.json(await Table.find().sort({name: 1})));
+app.post('/api/tables/:id', async (req, res) => { await Table.findByIdAndUpdate(req.params.id, { status: req.body.status }); res.json({ success: true }); });
+app.post('/api/orders', async (req, res) => { 
+    await new Order(req.body).save();
+    if(req.body.tableId) await Table.findByIdAndUpdate(req.body.tableId, { status: 'busy' });
     res.json({ success: true });
 });
-
-// API THỐNG KÊ (AGGREGATION)
 app.get('/api/stats', async (req, res) => {
-    try {
-        // 1. Tổng quan
-        const totalRevenue = await Order.aggregate([{ $group: { _id: null, total: { $sum: "$totalPrice" } } }]);
-        const totalOrders = await Order.countDocuments();
-        
-        // 2. Thống kê theo ngày (7 ngày gần nhất)
-        const dailyStats = await Order.aggregate([
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                    dailyRevenue: { $sum: "$totalPrice" },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } },
-            { $limit: 7 }
-        ]);
-
-        res.json({
-            revenue: totalRevenue[0]?.total || 0,
-            orders: totalOrders,
-            daily: dailyStats
-        });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+    const total = await Order.aggregate([{ $group: { _id: null, total: { $sum: "$totalPrice" }, count: {$sum: 1} } }]);
+    res.json({ revenue: total[0]?.total || 0, orders: total[0]?.count || 0 });
 });
 
-// Xử lý lỗi đường dẫn (Fix lỗi Cannot GET /)
+// Điều hướng thông minh
 app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(publicPath, 'admin.html'), (err) => {
-        if (err) res.sendFile(path.join(publicPath, 'index.html'));
+    // Mặc định vào trang login (index.html)
+    res.sendFile(path.join(publicPath, 'index.html'), (err) => {
+        if (err) res.status(500).send("Lỗi: Không tìm thấy file index.html");
     });
 });
 
