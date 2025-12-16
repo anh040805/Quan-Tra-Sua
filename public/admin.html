@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Quản Lý Trà Sữa</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f6f9; display: flex; height: 100vh; overflow: hidden; }
         
@@ -55,12 +54,12 @@
 <body>
 
     <div class="sidebar">
-        <div class="menu-item" onclick="showSection('orders')">
-    <i class="fas fa-list-alt"></i> Đơn Hàng Online
-</div>
         <div class="brand">QUẢN LÝ TRÀ SỮA</div>
         <div class="menu-item active" onclick="showSection('dashboard')">
             <i class="fas fa-home"></i> Tổng Quan
+        </div>
+        <div class="menu-item" onclick="showSection('orders')">
+            <i class="fas fa-list-alt"></i> Đơn Hàng Online
         </div>
         <div class="menu-item" onclick="showSection('pos')">
             <i class="fas fa-cash-register"></i> Bán Hàng (POS)
@@ -85,12 +84,6 @@
                     </div>
                     <i class="fas fa-dollar-sign stat-icon" style="color: #27ae60;"></i>
                 </div>
-                <div class="section">
-    <h2>📈 Biểu Đồ Doanh Thu (7 Ngày Qua)</h2>
-    <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); height: 400px;">
-        <canvas id="revenueChart"></canvas>
-    </div>
-</div>
                 <div class="stat-card">
                     <div class="stat-info">
                         <h3 id="total-orders">0</h3>
@@ -100,8 +93,33 @@
                 </div>
             </div>
             
-            <div style="background: white; padding: 20px; border-radius: 10px;">
-                <canvas id="revenueChart"></canvas>
+            <div class="section" style="display: block;">
+                <h2>📈 Biểu Đồ Doanh Thu (7 Ngày Qua)</h2>
+                <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); height: 400px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="orders" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>📦 Đơn Hàng Mới</h2>
+                <button onclick="loadOrders()" class="btn-action">🔄 Làm mới</button>
+            </div>
+            <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 2px solid #eee;">
+                            <th style="padding: 15px; text-align: left;">Thời gian</th>
+                            <th style="padding: 15px; text-align: left;">Khách hàng</th>
+                            <th style="padding: 15px; text-align: left;">Món đặt</th>
+                            <th style="padding: 15px; text-align: left;">Tổng tiền</th>
+                            <th style="padding: 15px; text-align: left;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-list-body">
+                        </tbody>
+                </table>
             </div>
         </div>
 
@@ -129,29 +147,9 @@
             <div class="table-grid" id="table-grid">
                 </div>
         </div>
-<div id="orders" class="section">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2>📦 Đơn Hàng Mới</h2>
-        <button onclick="loadOrders()" class="btn-action">🔄 Làm mới</button>
-    </div>
-    <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 15px;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: #f8f9fa; border-bottom: 2px solid #eee;">
-                    <th style="padding: 15px; text-align: left;">Thời gian</th>
-                    <th style="padding: 15px; text-align: left;">Khách hàng</th>
-                    <th style="padding: 15px; text-align: left;">Món đặt</th>
-                    <th style="padding: 15px; text-align: left;">Tổng tiền</th>
-                    <th style="padding: 15px; text-align: left;">Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody id="order-list-body">
-                </tbody>
-        </table>
-    </div>
-</div>
+
         <div id="stats" class="section">
-            <h2>Báo Cáo Doanh Thu</h2>
+            <h2>Báo Cáo Doanh Thu Chi Tiết</h2>
             <p>Biểu đồ chi tiết doanh thu theo ngày trong tháng.</p>
             <div style="background: white; padding: 20px; border-radius: 10px; height: 400px;">
                 <canvas id="detailedChart"></canvas>
@@ -161,108 +159,120 @@
     </div>
 
     <script>
-        // --- Dán code này vào CUỐI THẺ <script> trong admin.html ---
-
-async function renderChart() {
-    // 1. Lấy dữ liệu từ Server (API này đã được tạo trong server.js)
-    const res = await fetch('/api/chart-data');
-    const data = await res.json();
-
-    // 2. Xử lý dữ liệu
-    const labels = data.map(item => item._id); // Danh sách Ngày (Trục X)
-    const values = data.map(item => item.total); // Danh sách Tiền (Trục Y)
-    
-    // 3. Khởi tạo biểu đồ
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'line', // Loại biểu đồ đường
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Doanh thu (VNĐ)',
-                data: values,
-                borderColor: '#764ba2', // Màu Tím
-                backgroundColor: 'rgba(118, 75, 162, 0.2)', 
-                borderWidth: 3,
-                tension: 0.4, 
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // Quan trọng để biểu đồ chiếm hết khung 400px
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-}
-
-// Gọi hàm vẽ biểu đồ ngay khi trang tải xong
-renderChart();
         let products = [];
         let cart = [];
         let tables = [];
-        let myChart = null;
+        let myChart = null; // Biến cho biểu đồ chính (Dashboard)
 
-        // --- ĐIỀU HƯỚNG ---
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // --- HÀM VẼ BIỂU ĐỒ (Đã sửa lỗi cấu trúc) ---
+        async function renderChart() {
+            try {
+                const res = await fetch('/api/chart-data');
+                const data = await res.json();
+                
+                const labels = data.map(item => item._id); 
+                const values = data.map(item => item.total); 
+                
+                if (myChart) myChart.destroy(); 
+                
+                const ctx = document.getElementById('revenueChart').getContext('2d');
 
-            if(id === 'dashboard' || id === 'stats') loadStats();
-            if(id === 'pos') loadPOS();
-            if(id === 'tables') loadTables();
+                myChart = new Chart(ctx, { 
+                    type: 'line', 
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: values,
+                            borderColor: '#764ba2', 
+                            backgroundColor: 'rgba(118, 75, 162, 0.2)', 
+                            borderWidth: 3,
+                            tension: 0.4, 
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+
+                // Vẽ biểu đồ ở tab Thống kê chi tiết luôn
+                const ctx2 = document.getElementById('detailedChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh Thu Theo Ngày',
+                            data: values,
+                            borderColor: '#e74c3c',
+                            fill: false
+                        }]
+                    }
+                });
+
+            } catch(e) {
+                console.error("Lỗi vẽ biểu đồ:", e);
+            }
         }
 
-        // --- 1. LOGIC THỐNG KÊ (DASHBOARD) ---
+
+        // --- LOGIC THỐNG KÊ (DASHBOARD) ---
         async function loadStats() {
-            const res = await fetch('/api/stats');
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
 
-            // Hiển thị số liệu
-            document.getElementById('total-revenue').innerText = data.revenue.toLocaleString() + 'đ';
-            document.getElementById('total-orders').innerText = data.orders;
+                // Hiển thị số liệu
+                document.getElementById('total-revenue').innerText = data.totalRevenue.toLocaleString() + 'đ';
+                document.getElementById('total-orders').innerText = data.totalOrders;
 
-            // Vẽ biểu đồ
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            if(myChart) myChart.destroy(); // Xóa biểu đồ cũ nếu có
+                // Gọi hàm vẽ biểu đồ sau khi tải thống kê xong
+                renderChart(); 
 
-            const labels = data.daily.map(d => d._id);
-            const values = data.daily.map(d => d.dailyRevenue);
-
-            myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Doanh Thu (VNĐ)',
-                        data: values,
-                        backgroundColor: '#3498db'
-                    }]
-                }
-            });
-            
-            // Vẽ biểu đồ ở tab Thống kê chi tiết luôn
-            const ctx2 = document.getElementById('detailedChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Doanh Thu Theo Ngày',
-                        data: values,
-                        borderColor: '#e74c3c',
-                        fill: false
-                    }]
-                }
-            });
+            } catch (error) {
+                console.error("Lỗi tải thống kê:", error);
+            }
         }
 
-        // --- 2. LOGIC POS (BÁN HÀNG) ---
+        // --- LOGIC QUẢN LÝ ĐƠN HÀNG ---
+        async function loadOrders() {
+            try {
+                const res = await fetch('/api/all-orders');
+                const orders = await res.json();
+                
+                const tbody = document.getElementById('order-list-body');
+                if(orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center;">Chưa có đơn hàng nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = orders.map(order => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px;">${new Date(order.createdAt).toLocaleString()}</td>
+                        <td style="padding: 15px;">
+                            <b>${order.customerName}</b><br>
+                            <small>${order.phone || 'Tại bàn'}</small>
+                        </td>
+                        <td style="padding: 15px;">
+                            ${order.items.map(i => `<div>- ${i.name}</div>`).join('')}
+                        </td>
+                        <td style="padding: 15px; color:#c0392b; font-weight:bold;">
+                            ${order.totalPrice.toLocaleString()}đ
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="background:#d4edda; color:#155724; padding:5px 10px; border-radius:15px; font-size:12px;">
+                                ${order.status || 'Mới đặt'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error("Lỗi tải đơn hàng:", e); }
+        }
+
+        // --- LOGIC POS (BÁN HÀNG) ---
         async function loadPOS() {
             // Lấy món ăn
             const resP = await fetch('/api/products');
@@ -282,11 +292,11 @@ renderChart();
 
         async function loadTableOptions() {
             const resT = await fetch('/api/tables');
-            const tables = await resT.json();
+            tables = await resT.json(); // Cập nhật biến tables global
             const select = document.getElementById('select-table');
             select.innerHTML = '<option value="">-- Chọn Bàn / Mang Về --</option>';
             tables.forEach(t => {
-                select.innerHTML += `<option value="${t._id}">${t.name} (${t.status === 'busy' ? 'Đang có khách' : 'Trống'})</option>`;
+                select.innerHTML += `<option value="${t._id}" ${t.status === 'busy' ? 'disabled' : ''}>${t.name} (${t.status === 'busy' ? 'Đang có khách' : 'Trống'})</option>`;
             });
         }
 
@@ -315,11 +325,14 @@ renderChart();
             if(cart.length === 0) return alert("Chưa chọn món!");
             const tableId = document.getElementById('select-table').value;
             
+            const table = tables.find(t => t._id === tableId); // Tìm thông tin bàn
+
             const orderData = {
-                customerName: "Khách tại quầy",
+                customerName: table ? `Khách Bàn ${table.name.replace('Bàn ', '')}` : "Khách mang về",
                 totalPrice: cart.reduce((sum, i) => sum + i.price, 0),
                 items: cart,
-                tableId: tableId || null
+                tableId: tableId || null,
+                phone: "" // Không cần SĐT cho POS
             };
 
             await fetch('/api/orders', {
@@ -328,13 +341,23 @@ renderChart();
                 body: JSON.stringify(orderData)
             });
 
+            // Nếu thanh toán tại bàn, cập nhật trạng thái bàn thành busy
+            if (tableId) {
+                 await fetch(`/api/tables/${tableId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: 'busy' })
+                });
+                loadTableOptions(); // Cập nhật lại trạng thái bàn trong select
+            }
+           
             alert("✅ Thanh toán thành công! In hóa đơn...");
             cart = [];
             renderCart();
-            loadTableOptions(); // Cập nhật lại trạng thái bàn trong select
         }
 
-        // --- 3. LOGIC QUẢN LÝ BÀN ---
+
+        // --- LOGIC QUẢN LÝ BÀN ---
         async function loadTables() {
             const res = await fetch('/api/tables');
             tables = await res.json();
@@ -361,54 +384,33 @@ renderChart();
             loadTables(); // Load lại giao diện
         }
 
-        // Mặc định load dashboard
-        loadStats();
-    // --- 4. LOGIC QUẢN LÝ ĐƠN HÀNG ---
-async function loadOrders() {
-    const res = await fetch('/api/all-orders');
-    const orders = await res.json();
-    
-    const tbody = document.getElementById('order-list-body');
-    if(orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center;">Chưa có đơn hàng nào</td></tr>';
-        return;
-    }
 
-    tbody.innerHTML = orders.map(order => `
-        <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 15px;">${new Date(order.createdAt).toLocaleString()}</td>
-            <td style="padding: 15px;">
-                <b>${order.customerName}</b><br>
-                <small>${order.phone || 'Tại bàn'}</small>
-            </td>
-            <td style="padding: 15px;">
-                ${order.items.map(i => `<div>- ${i.name}</div>`).join('')}
-            </td>
-            <td style="padding: 15px; color:#c0392b; font-weight:bold;">
-                ${order.totalPrice.toLocaleString()}đ
-            </td>
-            <td style="padding: 15px;">
-                <span style="background:#d4edda; color:#155724; padding:5px 10px; border-radius:15px; font-size:12px;">
-                    ${order.status || 'Mới đặt'}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-}
+        // --- ĐIỀU HƯỚNG VÀ KHỞI TẠO (Đã sửa lỗi trùng hàm) ---
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            
+            // Tìm nút bấm và thêm class 'active'
+            document.querySelector(`.menu-item[onclick="showSection('${id}')"]`).classList.add('active');
 
-// Cập nhật hàm showSection để nó tự tải đơn khi bấm vào tab
-const oldShowSection = showSection; // Lưu hàm cũ
-showSection = function(id) {
-    oldShowSection(id); // Gọi hàm cũ
-    if(id === 'orders') loadOrders(); // Thêm logic tải đơn
-}
 
-// Tự động tải đơn hàng mới mỗi 10 giây
-setInterval(() => {
-    if(document.getElementById('orders').classList.contains('active')) {
-        loadOrders();
-    }
-}, 10000);
+            // Tải dữ liệu theo tab
+            if(id === 'dashboard' || id === 'stats') loadStats();
+            if(id === 'pos') loadPOS();
+            if(id === 'tables') loadTables();
+            if(id === 'orders') loadOrders();
+        }
+
+        // Khởi tạo lần đầu
+        showSection('dashboard'); 
+
+        // Tự động tải đơn hàng mới mỗi 10 giây
+        setInterval(() => {
+            if(document.getElementById('orders') && document.getElementById('orders').classList.contains('active')) {
+                loadOrders();
+            }
+        }, 10000);
     </script>
 
 </body>
