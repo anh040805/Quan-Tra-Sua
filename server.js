@@ -114,8 +114,6 @@ app.get(/.*/, (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server chạy tại Port: ${PORT}`));
 // --- QUAN TRỌNG: CẤU HÌNH ĐƯỜNG DẪN ---
 
 // 1. Phục vụ các file tĩnh (html, css, js)
