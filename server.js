@@ -8,91 +8,142 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- CẤU HÌNH ĐƯỜNG DẪN THÔNG MINH ---
-// Tự động tìm file index.html dù ở trong 'public' hay ở ngoài
+// --- CẤU HÌNH ĐƯỜNG DẪN ---
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 app.use(express.static(__dirname)); 
 
-// --- KẾT NỐI DATABASE ---
-// ⚠️ QUAN TRỌNG: Hãy thay mật khẩu của bạn vào chỗ TraSua123
+// --- KẾT NỐI MONGODB ---
+// ⚠️ Thay mật khẩu của bạn vào đây nhé
 const mongoURI = 'mongodb+srv://admin:trasua123@trasua.hycfxqc.mongodb.net/?appName=Trasua';
 mongoose.connect(mongoURI)
-    .then(() => console.log('✅ Đã kết nối MongoDB thành công!'))
-    .catch(err => console.error('❌ Lỗi kết nối DB:', err));
+    .then(() => console.log('✅ Đã kết nối MongoDB!'))
+    .catch(err => console.error('❌ Lỗi DB:', err));
 
-// --- TẠO SCHEMA (KHUÔN DỮ LIỆU) ---
+// --- SCHEMAS (KHUÔN DỮ LIỆU) ---
 const ProductSchema = new mongoose.Schema({
-    name: String,
-    price: Number,
-    description: String,
-    image: String,
-    category: String
+    name: String, price: Number, category: String, image: String
+});
+
+const TableSchema = new mongoose.Schema({
+    name: String, status: { type: String, default: 'empty' } // empty, busy
 });
 
 const OrderSchema = new mongoose.Schema({
     customerName: String,
-    phone: String, // Dùng SĐT để định danh khách hàng
-    address: String,
-    items: Array,
     totalPrice: Number,
-    status: { type: String, default: 'Đang xử lý' },
+    items: Array,
+    tableId: String, // Nếu ăn tại bàn
     createdAt: { type: Date, default: Date.now }
 });
 
 const Product = mongoose.model('Product', ProductSchema);
+const Table = mongoose.model('Table', TableSchema);
 const Order = mongoose.model('Order', OrderSchema);
 
-// --- CÁC API (CHỨC NĂNG) ---
-
-// 1. Lấy menu
-app.get('/api/products', async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.json(products);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// 2. Tạo dữ liệu mẫu (Reset Menu)
+// --- API KHỞI TẠO DỮ LIỆU MẪU (CHẠY 1 LẦN) ---
 app.get('/api/init', async (req, res) => {
+    // 1. Tạo Menu Đa Dạng
     await Product.deleteMany({});
     await Product.insertMany([
-        { name: "Trà Sữa Trân Châu Đường Đen", price: 35000, category: "Trà Sữa", description: "Sữa tươi thanh trùng, trân châu nấu đường đen đậm đà.", image: "https://cdn-icons-png.flaticon.com/512/3081/3081162.png" },
-        { name: "Trà Đào Cam Sả", price: 40000, category: "Trà Trái Cây", description: "Đào ngâm giòn, vị trà thơm hương sả.", image: "https://cdn-icons-png.flaticon.com/512/931/931949.png" },
-        { name: "Matcha Đá Xay", price: 45000, category: "Đá Xay", description: "Matcha Nhật Bản xay nhuyễn với lớp kem cheese béo.", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" },
-        { name: "Lục Trà Kim Quất", price: 30000, category: "Trà Trái Cây", description: "Vị chua ngọt thanh mát, giải nhiệt cực đã.", image: "https://cdn-icons-png.flaticon.com/512/3081/3081096.png" },
-        { name: "Cà Phê Sữa Đá", price: 25000, category: "Cà Phê", description: "Cà phê rang xay nguyên chất, sữa đặc béo ngậy.", image: "https://cdn-icons-png.flaticon.com/512/2935/2935413.png" },
-        { name: "Trà Sữa Thái Xanh", price: 32000, category: "Trà Sữa", description: "Hương thơm trà Thái đặc trưng, màu xanh bắt mắt.", image: "https://cdn-icons-png.flaticon.com/512/1187/1187466.png" }
+        { name: "Sữa Tươi Trân Châu Đường Đen", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/3081/3081162.png" },
+        { name: "Trà Sữa Truyền Thống", price: 30000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/1187/1187466.png" },
+        { name: "Trà Sữa Matcha", price: 38000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" },
+        { name: "Trà Đào Cam Sả", price: 40000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/931/931949.png" },
+        { name: "Lục Trà Kim Quất", price: 35000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/3081/3081096.png" },
+        { name: "Trà Vải Hoa Hồng", price: 42000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/1047/1047503.png" },
+        { name: "Cà Phê Sữa Đá", price: 25000, category: "Cà Phê", image: "https://cdn-icons-png.flaticon.com/512/2935/2935413.png" },
+        { name: "Bạc Xỉu", price: 28000, category: "Cà Phê", image: "https://cdn-icons-png.flaticon.com/512/924/924514.png" }
     ]);
-    res.send("Đã khởi tạo Menu thành công! Hãy quay lại trang chủ.");
+
+    // 2. Tạo Bàn (10 bàn)
+    await Table.deleteMany({});
+    const tables = [];
+    for(let i=1; i<=10; i++) tables.push({ name: `Bàn ${i}`, status: 'empty' });
+    await Table.insertMany(tables);
+
+    // 3. Tạo Đơn Hàng Giả Lập (Để vẽ biểu đồ)
+    await Order.deleteMany({});
+    // Tạo 20 đơn ngẫu nhiên trong 7 ngày qua
+    const fakeOrders = [];
+    for(let i=0; i<20; i++) {
+        const daysAgo = Math.floor(Math.random() * 7);
+        const date = new Date();
+        date.setDate(date.getDate() - daysAgo);
+        fakeOrders.push({
+            customerName: "Khách lẻ",
+            totalPrice: Math.floor(Math.random() * 100000) + 30000,
+            items: [{name: "Trà Sữa Test", price: 30000}],
+            createdAt: date
+        });
+    }
+    await Order.insertMany(fakeOrders);
+
+    res.send("Đã khởi tạo Menu, Bàn và Dữ liệu thống kê mẫu!");
 });
 
-// 3. Đặt hàng
+// --- CÁC API CHÍNH ---
+
+// Lấy danh sách sản phẩm
+app.get('/api/products', async (req, res) => res.json(await Product.find()));
+
+// Lấy danh sách bàn
+app.get('/api/tables', async (req, res) => res.json(await Table.find().sort({name: 1})));
+
+// Cập nhật trạng thái bàn
+app.post('/api/tables/:id', async (req, res) => {
+    await Table.findByIdAndUpdate(req.params.id, { status: req.body.status });
+    res.json({ success: true });
+});
+
+// Tạo đơn hàng mới
 app.post('/api/orders', async (req, res) => {
-    try {
-        const newOrder = new Order(req.body);
-        await newOrder.save();
-        res.json({ success: true, message: "Đã nhận đơn hàng!" });
-    } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+    const newOrder = new Order(req.body);
+    await newOrder.save();
+    
+    // Nếu có chọn bàn, chuyển bàn đó thành 'busy'
+    if(req.body.tableId) {
+        await Table.findByIdAndUpdate(req.body.tableId, { status: 'busy' });
+    }
+    res.json({ success: true });
 });
 
-// 4. Xem lịch sử (Tìm theo số điện thoại)
-app.get('/api/history/:phone', async (req, res) => {
+// API THỐNG KÊ (AGGREGATION)
+app.get('/api/stats', async (req, res) => {
     try {
-        const orders = await Order.find({ phone: req.params.phone }).sort({ createdAt: -1 });
-        res.json(orders);
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        // 1. Tổng quan
+        const totalRevenue = await Order.aggregate([{ $group: { _id: null, total: { $sum: "$totalPrice" } } }]);
+        const totalOrders = await Order.countDocuments();
+        
+        // 2. Thống kê theo ngày (7 ngày gần nhất)
+        const dailyStats = await Order.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    dailyRevenue: { $sum: "$totalPrice" },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } },
+            { $limit: 7 }
+        ]);
+
+        res.json({
+            revenue: totalRevenue[0]?.total || 0,
+            orders: totalOrders,
+            daily: dailyStats
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-// --- XỬ LÝ LỖI KHÔNG TÌM THẤY FILE ---
-// Lưu ý: Dùng dấu gạch chéo /.*/ chứ KHÔNG dùng dấu ngoặc kép '*'
+// Xử lý lỗi đường dẫn (Fix lỗi Cannot GET /)
 app.get(/.*/, (req, res) => {
-    const indexPath = path.join(publicPath, 'index.html');
-    res.sendFile(indexPath, (err) => {
-        if (err) res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(publicPath, 'admin.html'), (err) => {
+        if (err) res.sendFile(path.join(publicPath, 'index.html'));
     });
 });
 
-// --- CHẠY SERVER ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server đang chạy tại Port: ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server chạy tại Port: ${PORT}`));
