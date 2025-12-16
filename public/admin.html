@@ -54,6 +54,9 @@
 <body>
 
     <div class="sidebar">
+        <div class="menu-item" onclick="showSection('orders')">
+    <i class="fas fa-list-alt"></i> Đơn Hàng Online
+</div>
         <div class="brand">QUẢN LÝ TRÀ SỮA</div>
         <div class="menu-item active" onclick="showSection('dashboard')">
             <i class="fas fa-home"></i> Tổng Quan
@@ -119,7 +122,27 @@
             <div class="table-grid" id="table-grid">
                 </div>
         </div>
-
+<div id="orders" class="section">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>📦 Đơn Hàng Mới</h2>
+        <button onclick="loadOrders()" class="btn-action">🔄 Làm mới</button>
+    </div>
+    <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 15px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa; border-bottom: 2px solid #eee;">
+                    <th style="padding: 15px; text-align: left;">Thời gian</th>
+                    <th style="padding: 15px; text-align: left;">Khách hàng</th>
+                    <th style="padding: 15px; text-align: left;">Món đặt</th>
+                    <th style="padding: 15px; text-align: left;">Tổng tiền</th>
+                    <th style="padding: 15px; text-align: left;">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="order-list-body">
+                </tbody>
+        </table>
+    </div>
+</div>
         <div id="stats" class="section">
             <h2>Báo Cáo Doanh Thu</h2>
             <p>Biểu đồ chi tiết doanh thu theo ngày trong tháng.</p>
@@ -293,6 +316,53 @@
 
         // Mặc định load dashboard
         loadStats();
+    // --- 4. LOGIC QUẢN LÝ ĐƠN HÀNG ---
+async function loadOrders() {
+    const res = await fetch('/api/all-orders');
+    const orders = await res.json();
+    
+    const tbody = document.getElementById('order-list-body');
+    if(orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center;">Chưa có đơn hàng nào</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = orders.map(order => `
+        <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 15px;">${new Date(order.createdAt).toLocaleString()}</td>
+            <td style="padding: 15px;">
+                <b>${order.customerName}</b><br>
+                <small>${order.phone || 'Tại bàn'}</small>
+            </td>
+            <td style="padding: 15px;">
+                ${order.items.map(i => `<div>- ${i.name}</div>`).join('')}
+            </td>
+            <td style="padding: 15px; color:#c0392b; font-weight:bold;">
+                ${order.totalPrice.toLocaleString()}đ
+            </td>
+            <td style="padding: 15px;">
+                <span style="background:#d4edda; color:#155724; padding:5px 10px; border-radius:15px; font-size:12px;">
+                    ${order.status || 'Mới đặt'}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Cập nhật hàm showSection để nó tự tải đơn khi bấm vào tab
+const oldShowSection = showSection; // Lưu hàm cũ
+showSection = function(id) {
+    oldShowSection(id); // Gọi hàm cũ
+    if(id === 'orders') loadOrders(); // Thêm logic tải đơn
+}
+
+// Tự động tải đơn hàng mới mỗi 10 giây
+setInterval(() => {
+    if(document.getElementById('orders').classList.contains('active')) {
+        loadOrders();
+    }
+}, 10000);
     </script>
+
 </body>
 </html>

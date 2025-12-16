@@ -93,6 +93,16 @@ app.post('/api/register', async (req, res) => {
 });
 
 // --- CÁC API KHÁC (Giữ nguyên logic cũ) ---
+// Lấy toàn bộ đơn hàng (Mới nhất nằm trên cùng)
+app.get('/api/all-orders', async (req, res) => {
+    try {
+        const orders = await Order.find().sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Đường dẫn cho trang Home mới
+app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'public', 'home.html')));
 app.get('/api/products', async (req, res) => res.json(await Product.find()));
 app.get('/api/tables', async (req, res) => res.json(await Table.find().sort({name: 1})));
 app.post('/api/tables/:id', async (req, res) => { await Table.findByIdAndUpdate(req.params.id, { status: req.body.status }); res.json({ success: true }); });

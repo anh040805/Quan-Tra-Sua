@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Trà Sữa Cloud</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Quicksand', sans-serif; margin: 0; background-color: #f9f9f9; }
+        
+        /* Banner to đẹp */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 60px 20px; text-align: center;
+            border-radius: 0 0 50% 50% / 20px;
+        }
+        .hero h1 { margin: 0; font-size: 40px; }
+        .hero p { font-size: 18px; margin-top: 10px; opacity: 0.9; }
+
+        /* Nút điều hướng */
+        .action-container {
+            max-width: 800px; margin: -30px auto 0; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; padding: 20px;
+        }
+        
+        .card {
+            background: white; padding: 30px; border-radius: 20px;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: 0.3s; cursor: pointer; text-decoration: none; color: #333;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+        .card-icon { font-size: 50px; margin-bottom: 15px; display: block; }
+        .card h3 { margin: 0; font-size: 22px; color: #764ba2; }
+        .card p { color: #666; margin-top: 5px; }
+
+        .btn-logout {
+            display: block; width: 150px; margin: 50px auto; padding: 10px;
+            background: #e74c3c; color: white; text-align: center; text-decoration: none;
+            border-radius: 30px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1>Chào mừng, <span id="user-name">Bạn</span>! 👋</h1>
+        <p>Hôm nay bạn muốn uống gì nào?</p>
+    </div>
+
+    <div class="action-container">
+        <a href="/menu" class="card">
+            <span class="card-icon">🥤</span>
+            <h3>Đặt Món Ngay</h3>
+            <p>Xem menu trà sữa mới nhất</p>
+        </a>
+
+        <a href="#" onclick="alert('Hãy vào Menu để xem lịch sử nhé!')" class="card">
+            <span class="card-icon">📜</span>
+            <h3>Lịch Sử Đơn</h3>
+            <p>Xem lại các món đã đặt</p>
+        </a>
+    </div>
+
+    <a href="/" onclick="localStorage.removeItem('user')" class="btn-logout">Đăng Xuất</a>
+
+    <script>
+        // Lấy tên người dùng từ bộ nhớ
+        const user = JSON.parse(localStorage.getItem('user'));
+        if(user && user.name) {
+            document.getElementById('user-name').innerText = user.name;
+        } else {
+            window.location.href = '/'; // Chưa đăng nhập thì đá về login
+        }
+    </script>
+</body>
+</html>
