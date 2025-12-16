@@ -85,7 +85,8 @@ app.get('/api/history/:phone', async (req, res) => {
 });
 
 // --- XỬ LÝ LỖI KHÔNG TÌM THẤY FILE ---
-app.get('*', (req, res) => {
+// Lưu ý: Dùng dấu gạch chéo /.*/ chứ KHÔNG dùng dấu ngoặc kép '*'
+app.get(/.*/, (req, res) => {
     const indexPath = path.join(publicPath, 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) res.sendFile(path.join(__dirname, 'index.html'));
