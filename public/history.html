@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Đơn Hàng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Quicksand', sans-serif; background-color: #f4f7f6; margin: 0; }
+        
+        .header { background: white; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; }
+        .back-btn { text-decoration: none; color: #333; font-weight: bold; font-size: 18px; }
+        
+        .container { max-width: 600px; margin: 20px auto; padding: 0 20px; }
+        
+        .search-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; }
+        .input-phone { width: 70%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+        .btn-search { padding: 12px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .order-list { margin-top: 20px; }
+        .order-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 5px 10px rgba(0,0,0,0.05); border-left: 5px solid #764ba2; }
+        
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .time { color: #888; font-size: 14px; }
+        .status { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+        
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .total { text-align: right; color: #e74c3c; font-size: 18px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="/home" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+        <h3>📜 Lịch Sử Đơn Hàng</h3>
+    </div>
+
+    <div class="container">
+        <div class="search-box">
+            <p>Nhập số điện thoại bạn đã dùng để đặt món:</p>
+            <input type="tel" id="phone-input" class="input-phone" placeholder="Ví dụ: 0912345678">
+            <button class="btn-search" onclick="fetchHistory()">Xem Ngay</button>
+        </div>
+
+        <div id="loading" style="display:none; text-align:center; margin-top:20px;">⏳ Đang tải...</div>
+        <div id="history-list" class="order-list"></div>
+    </div>
+
+    <script>
+        // Tự động điền SĐT nếu đã lưu lần trước
+        const savedPhone = localStorage.getItem('user_phone');
+        if(savedPhone) {
+            document.getElementById('phone-input').value = savedPhone;
+            fetchHistory(); // Tự tìm luôn
+        }
+
+        async function fetchHistory() {
+            const phone = document.getElementById('phone-input').value.trim();
+            if(!phone) return alert("Vui lòng nhập số điện thoại!");
+
+            // Lưu SĐT lại cho lần sau đỡ phải nhập
+            localStorage.setItem('user_phone', phone);
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('history-list').innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/history?phone=${phone}`);
+                const orders = await res.json();
+                
+                document.getElementById('loading').style.display = 'none';
+
+                if(orders.length === 0) {
+                    document.getElementById('history-list').innerHTML = '<p style="text-align:center; color:#666">Chưa tìm thấy đơn hàng nào với SĐT này.</p>';
+                    return;
+                }
+
+                document.getElementById('history-list').innerHTML = orders.map(order => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="time">${new Date(order.createdAt).toLocaleString()}</span>
+                            <span class="status">${order.status || 'Đang xử lý'}</span>
+                        </div>
+                        <div>
+                            ${order.items.map(item => `
+                                <div class="item-row">
+                                    <span>${item.name}</span>
+                                    <b>${item.price.toLocaleString()}đ</b>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="total">Tổng: ${order.totalPrice.toLocaleString()}đ</div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                alert("Lỗi kết nối!");
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

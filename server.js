@@ -107,7 +107,19 @@ app.get('/api/all-orders', async (req, res) => {
         res.json(orders);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
+// --- API LỊCH SỬ ĐƠN HÀNG (Tìm theo SĐT) ---
+app.get('/api/history', async (req, res) => {
+    const { phone } = req.query;
+    if (!phone) return res.json([]); 
+    try {
+        // Tìm đơn hàng theo SĐT, sắp xếp mới nhất lên đầu
+        const orders = await Order.find({ phone: phone }).sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
+// Thêm đường dẫn cho trang History
+app.get('/history', (req, res) => res.sendFile(path.join(__dirname, 'public', 'history.html')));
 // Đường dẫn cho trang Home mới
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'public', 'home.html')));
 app.get('/api/products', async (req, res) => res.json(await Product.find()));
