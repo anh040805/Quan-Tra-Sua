@@ -159,10 +159,26 @@
     </div>
 
     <script>
-        let products = [];
+      let products = [];
         let cart = [];
         let tables = [];
-        let myChart = null; // Khai báo biến biểu đồ chính 1 lần
+        let myChart = null; 
+
+        // --- ĐIỀU HƯỚNG VÀ KHỞI TẠO ---
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            
+            const menuItem = document.querySelector(`.menu-item[onclick="showSection('${id}')"]`);
+            if(menuItem) menuItem.classList.add('active');
+
+            // Tải dữ liệu theo tab
+            if(id === 'dashboard' || id === 'stats') loadStats();
+            if(id === 'pos') loadPOS();
+            if(id === 'tables') loadTables();
+            if(id === 'orders') loadOrders();
+        }
 
         // --- HÀM VẼ BIỂU ĐỒ (Đã sửa lỗi cú pháp) ---
         async function renderChart(dailyData) {
@@ -170,7 +186,7 @@
                 // Lấy dữ liệu từ API hoặc từ loadStats truyền vào
                 const data = dailyData || (await (await fetch('/api/chart-data')).json());
 
-                // Nếu API /api/stats trả về daily là mảng trực tiếp
+                // Sử dụng data trực tiếp (nếu API chart-data trả về mảng) hoặc data.daily (nếu API stats trả về daily)
                 const labels = data.map(item => item._id); 
                 const values = data.map(item => item.total || item.dailyRevenue);
 
@@ -216,22 +232,21 @@
 
             } catch(e) {
                 console.error("Lỗi vẽ biểu đồ:", e);
-                // Biểu đồ sẽ không hiển thị nếu API /api/chart-data hoặc /api/stats bị lỗi
             }
         }
 
 
-        // --- LOGIC THỐNG KÊ (DASHBOARD) ---
+        // --- 1. LOGIC THỐNG KÊ (DASHBOARD) ---
         async function loadStats() {
             try {
                 const res = await fetch('/api/stats');
                 const data = await res.json();
 
-                // Sửa logic: Sử dụng totalRevenue và totalOrders cho thẻ thống kê
+                // Sửa LOGIC LỖI 1: Sử dụng totalRevenue và totalOrders
                 document.getElementById('total-revenue').innerText = (data.totalRevenue || 0).toLocaleString() + 'đ';
                 document.getElementById('total-orders').innerText = data.totalOrders || 0;
 
-                // Gọi hàm vẽ biểu đồ sau khi tải thống kê xong, truyền dữ liệu daily (nếu API /api/stats có trả về daily)
+                // Gọi hàm vẽ biểu đồ sau khi tải thống kê xong, truyền dữ liệu daily
                 renderChart(data.daily); 
 
             } catch (error) {
@@ -239,7 +254,8 @@
             }
         }
 
-        // --- LOGIC QUẢN LÝ ĐƠN HÀNG ---
+
+        // --- 2. LOGIC QUẢN LÝ ĐƠN HÀNG (đã giữ nguyên) ---
         async function loadOrders() {
             try {
                 const res = await fetch('/api/all-orders');
@@ -274,7 +290,7 @@
             } catch (e) { console.error("Lỗi tải đơn hàng:", e); }
         }
 
-        // --- LOGIC POS (BÁN HÀNG) ---
+        // --- 3. LOGIC POS (BÁN HÀNG) ---
         async function loadPOS() {
             // Lấy món ăn
             const resP = await fetch('/api/products');
@@ -359,7 +375,7 @@
         }
 
 
-        // --- LOGIC QUẢN LÝ BÀN ---
+        // --- 4. LOGIC QUẢN LÝ BÀN ---
         async function loadTables() {
             const res = await fetch('/api/tables');
             tables = await res.json();
@@ -386,24 +402,6 @@
             loadTables(); // Load lại giao diện
         }
 
-
-        // --- ĐIỀU HƯỚNG VÀ KHỞI TẠO (Đã sửa lỗi trùng hàm) ---
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            
-            // Tìm nút bấm và thêm class 'active'
-            const menuItem = document.querySelector(`.menu-item[onclick="showSection('${id}')"]`);
-            if(menuItem) menuItem.classList.add('active');
-
-
-            // Tải dữ liệu theo tab
-            if(id === 'dashboard' || id === 'stats') loadStats();
-            if(id === 'pos') loadPOS();
-            if(id === 'tables') loadTables();
-            if(id === 'orders') loadOrders();
-        }
 
         // Khởi tạo lần đầu
         showSection('dashboard'); 
