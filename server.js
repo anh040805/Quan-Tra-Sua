@@ -15,7 +15,7 @@ app.use(express.static(__dirname));
 
 // --- KẾT NỐI MONGODB ---
 // ⚠️ Thay mật khẩu của bạn vào đây
-const mongoURI = 'mongodb+srv://admin:TraSua123@trasua.hycfxqc.mongodb.net/?appName=Trasua';
+const mongoURI = 'mongodb+srv://admin:trasua123@trasua.hycfxqc.mongodb.net/?appName=Trasua';
 mongoose.connect(mongoURI)
     .then(() => console.log('✅ Đã kết nối MongoDB!'))
     .catch(err => console.error('❌ Lỗi DB:', err));
