@@ -107,6 +107,25 @@ app.post('/api/register', async (req, res) => {
 });
 
 // --- CÁC API KHÁC (Giữ nguyên logic cũ) ---
+// --- API DỮ LIỆU BIỂU ĐỒ (Doanh thu 7 ngày gần nhất) ---
+app.get('/api/chart-data', async (req, res) => {
+    try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const stats = await Order.aggregate([
+            { $match: { createdAt: { $gte: sevenDaysAgo } } }, // Chỉ lấy 7 ngày qua
+            { 
+                $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, // Gom nhóm theo ngày
+                    total: { $sum: "$totalPrice" } // Cộng tổng tiền
+                } 
+            },
+            { $sort: { _id: 1 } } // Sắp xếp ngày tăng dần
+        ]);
+        res.json(stats);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 // Lấy toàn bộ đơn hàng (Mới nhất nằm trên cùng)
 app.get('/api/all-orders', async (req, res) => {
     try {

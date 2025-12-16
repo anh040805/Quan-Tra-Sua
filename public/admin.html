@@ -6,6 +6,7 @@
     <title>Hệ Thống Quản Lý Trà Sữa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f6f9; display: flex; height: 100vh; overflow: hidden; }
         
@@ -52,7 +53,12 @@
     </style>
 </head>
 <body>
-
+<h2 class="section">
+    📈 Biểu Đồ Doanh Thu (7 Ngày Qua)
+</h2>
+<div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); height: 400px;">
+    <canvas id="revenueChart"></canvas>
+</div>
     <div class="sidebar">
         <div class="menu-item" onclick="showSection('orders')">
     <i class="fas fa-list-alt"></i> Đơn Hàng Online
@@ -154,6 +160,46 @@
     </div>
 
     <script>
+        // --- Dán code này vào CUỐI THẺ <script> trong admin.html ---
+
+async function renderChart() {
+    // 1. Lấy dữ liệu từ Server (API này đã được tạo trong server.js)
+    const res = await fetch('/api/chart-data');
+    const data = await res.json();
+
+    // 2. Xử lý dữ liệu
+    const labels = data.map(item => item._id); // Danh sách Ngày (Trục X)
+    const values = data.map(item => item.total); // Danh sách Tiền (Trục Y)
+    
+    // 3. Khởi tạo biểu đồ
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line', // Loại biểu đồ đường
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: values,
+                borderColor: '#764ba2', // Màu Tím
+                backgroundColor: 'rgba(118, 75, 162, 0.2)', 
+                borderWidth: 3,
+                tension: 0.4, 
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Quan trọng để biểu đồ chiếm hết khung 400px
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// Gọi hàm vẽ biểu đồ ngay khi trang tải xong
+renderChart();
         let products = [];
         let cart = [];
         let tables = [];
