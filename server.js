@@ -34,7 +34,14 @@ const UserSchema = new mongoose.Schema({
 const ProductSchema = new mongoose.Schema({ name: String, price: Number, category: String, image: String });
 const TableSchema = new mongoose.Schema({ name: String, status: { type: String, default: 'empty' } });
 const OrderSchema = new mongoose.Schema({
-    customerName: String, totalPrice: Number, items: Array, tableId: String, createdAt: { type: Date, default: Date.now }
+    customerName: String,
+    phone: String,       // <--- QUAN TRỌNG: Phải có dòng này mới lưu được SĐT
+    address: String,     // Thêm địa chỉ để admin biết đường giao
+    totalPrice: Number,
+    items: Array,
+    tableId: String,
+    status: { type: String, default: 'Chờ xác nhận' }, // Thêm trạng thái đơn
+    createdAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', UserSchema);
