@@ -7,222 +7,238 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- CSS GIAO DIỆN --- */
+        /* --- CSS CŨ (GIỮ NGUYÊN CƠ BẢN) --- */
         body { font-family: 'Quicksand', sans-serif; background-color: #f4f7f6; margin: 0; color: #333; }
-        
-        /* Thanh menu trên cùng (Sticky Header) */
-        .header {
-            background: white; padding: 15px 5%; display: flex; justify-content: space-between;
-            align-items: center; box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-            position: sticky; top: 0; z-index: 100;
-        }
+        .header { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .back-link { text-decoration: none; color: #666; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .cart-btn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%); color: white;
-            border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4); transition: 0.3s;
-        }
-        .cart-btn:hover { transform: translateY(-2px); }
+        .cart-btn { background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%); color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .cart-count { background: white; color: #ff4757; padding: 2px 8px; border-radius: 50%; margin-left: 5px; font-size: 14px; }
-
-        /* Lưới sản phẩm */
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .section-title { text-align: center; font-size: 28px; margin-bottom: 30px; color: #764ba2; }
-        
-        .product-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 30px;
-        }
-
-        /* Thẻ sản phẩm */
-        .product-card {
-            background: white; border-radius: 20px; padding: 25px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s;
-            display: flex; flex-direction: column;
-        }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
-        .product-img { width: 140px; height: 140px; object-fit: contain; margin: 0 auto 15px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
-        .product-cat { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; }
+        .product-card { background: white; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-10px); }
+        .product-img { width: 140px; height: 140px; object-fit: contain; margin: 0 auto 15px; }
         .product-title { font-size: 18px; margin: 10px 0; flex-grow: 1; }
         .product-price { font-size: 22px; font-weight: bold; color: #ff4757; margin-bottom: 15px; }
-        .add-to-cart-btn {
-            background: #e2e8f0; color: #333; border: none; padding: 12px; width: 100%;
-            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .add-to-cart-btn { background: #e2e8f0; color: #333; border: none; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .add-to-cart-btn:hover { background: #764ba2; color: white; }
 
-        /* --- MODAL GIỎ HÀNG --- */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: white; width: 90%; max-width: 450px; border-radius: 20px;
-            padding: 30px; position: relative; max-height: 85vh; overflow-y: auto;
-        }
-        .close-modal { position: absolute; top: 20px; right: 25px; font-size: 24px; cursor: pointer; color: #999; }
+        /* --- CSS MỚI CHO MODAL TOPPING --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; }
         
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        /* Style cho danh sách topping */
+        .topping-list { text-align: left; margin: 15px 0; border-top: 1px dashed #ddd; border-bottom: 1px dashed #ddd; padding: 15px 0; }
+        .topping-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; cursor: pointer; }
+        .topping-item:hover { background: #f9f9f9; }
+        .topping-label { display: flex; align-items: center; gap: 10px; cursor: pointer; width: 100%; }
+        
+        /* Style cho giỏ hàng */
+        .cart-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid #eee; }
         .cart-item-info h4 { margin: 0; font-size: 16px; }
-        .cart-item-price { color: #ff4757; font-weight: bold; }
-        .remove-btn { color: #ff4757; cursor: pointer; font-size: 18px; padding: 5px; }
-
-        .cart-summary { margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee; }
-        .total-row { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-bottom: 25px; }
-        
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
-        .form-input {
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;
-            box-sizing: border-box; font-family: inherit;
-        }
-        .checkout-btn {
-            width: 100%; padding: 15px; background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold;
-            cursor: pointer; margin-top: 10px; transition: 0.3s;
-        }
-        .checkout-btn:hover { opacity: 0.9; }
+        .cart-item-toppings { font-size: 12px; color: #666; margin-top: 4px; }
+        .cart-summary { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px; }
+        .form-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .checkout-btn { width: 100%; padding: 15px; background: #764ba2; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="/home" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
+        <a href="/home" class="back-link"><i class="fas fa-arrow-left"></i> Quay lại</a>
         <button class="cart-btn" onclick="toggleCart(true)">
             <i class="fas fa-shopping-cart"></i> Giỏ hàng <span class="cart-count" id="cart-count">0</span>
         </button>
     </div>
 
     <div class="container">
-        <h2 class="section-title">✨ Thực Đơn Hôm Nay ✨</h2>
+        <h2 class="section-title">✨ Thực Đơn Đa Dạng ✨</h2>
         <div id="product-list" class="product-grid">
-            <p style="text-align: center; grid-column: 1/-1;">Đang tải menu...</p>
+            <p style="text-align: center;">Đang tải menu...</p>
+        </div>
+    </div>
+
+    <div id="toppingModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeToppingModal()">&times;</span>
+            <h3 id="modal-product-name" style="color: #764ba2; margin-top: 0;">Tên Món</h3>
+            <p style="color: #ff4757; font-weight: bold; font-size: 18px;" id="modal-product-price">0đ</p>
+            
+            <div class="topping-list">
+                <h4 style="margin: 0 0 10px 0;">Thêm Topping (+Tiền):</h4>
+                <div id="topping-options"></div>
+            </div>
+
+            <button class="checkout-btn" onclick="confirmAddToCart()">
+                <i class="fas fa-plus"></i> THÊM VÀO GIỎ (<span id="modal-total-price">0</span>đ)
+            </button>
         </div>
     </div>
 
     <div id="cartModal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="toggleCart(false)">&times;</span>
-            <h2 style="text-align: center; margin-top: 0;">Giỏ Hàng Của Bạn</h2>
-            
-            <div id="cart-items-list">
-                <p style="text-align: center; color: #999;">Giỏ hàng đang trống</p>
-            </div>
+            <h2 style="text-align: center; margin-top: 0;">Giỏ Hàng</h2>
+            <div id="cart-items-list"></div>
 
             <div class="cart-summary" id="cart-summary-section" style="display: none;">
-                <div class="total-row">
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
                     <span>Tổng cộng:</span>
                     <span style="color: #ff4757;" id="cart-total">0đ</span>
                 </div>
-
-                <h4 style="margin-bottom: 15px;">Thông tin giao hàng:</h4>
-                <div class="form-group">
-                    <label class="form-label">Người nhận:</label>
-                    <input type="text" id="cus-name" class="form-input" readonly style="background: #f9f9f9;">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Số điện thoại (*):</label>
-                    <input type="tel" id="cus-phone" class="form-input" placeholder="Nhập SĐT để shipper gọi...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Địa chỉ nhận hàng (*):</label>
-                    <textarea id="cus-address" class="form-input" rows="3" placeholder="Ví dụ: Số 123 đường ABC..."></textarea>
-                </div>
-                
+                <input type="text" id="cus-name" class="form-input" readonly style="background: #f9f9f9;">
+                <input type="tel" id="cus-phone" class="form-input" placeholder="Số điện thoại (*)">
+                <textarea id="cus-address" class="form-input" rows="2" placeholder="Địa chỉ nhận hàng (*)"></textarea>
                 <button class="checkout-btn" onclick="checkout()">ĐẶT HÀNG NGAY</button>
             </div>
         </div>
     </div>
 
     <script>
-        let products = []; // Chứa danh sách 10 món từ server
-        let cart = [];     // Chứa các món khách chọn
+        let products = [];
+        let cart = [];
+        let currentSelectedProduct = null; // Món đang chọn để thêm topping
 
-        // 1. Khởi tạo trang
+        // --- DANH SÁCH TOPPING (CẤU HÌNH TẠI ĐÂY) ---
+        const TOPPINGS = [
+            { id: 'tc_den', name: 'Trân châu đen', price: 5000 },
+            { id: 'tc_trang', name: 'Trân châu trắng', price: 5000 },
+            { id: 'thach_dua', name: 'Thạch dừa', price: 5000 },
+            { id: 'pudding', name: 'Pudding trứng', price: 7000 },
+            { id: 'kem_cheese', name: 'Kem Cheese', price: 10000 },
+            { id: 'dao_mieng', name: 'Đào miếng', price: 8000 }
+        ];
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadProducts(); // Tải menu
-            // Tự động điền tên người dùng nếu đã đăng nhập
+            loadProducts();
             const user = JSON.parse(localStorage.getItem('user'));
             if(user && user.name) document.getElementById('cus-name').value = user.name;
         });
 
-        // 2. Tải danh sách sản phẩm từ API
         async function loadProducts() {
             try {
                 const res = await fetch('/api/products');
                 products = await res.json();
                 renderProducts(products);
-            } catch (err) { 
-                console.error(err);
-                document.getElementById('product-list').innerHTML = '<p style="text-align: center; color: red;">Lỗi tải menu!</p>';
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // 3. Hiển thị sản phẩm ra màn hình
         function renderProducts(list) {
             const container = document.getElementById('product-list');
-            if(list.length === 0) {
-                 container.innerHTML = `<p style="text-align:center; width:100%; grid-column: 1/-1;">Menu trống. Vui lòng chạy link /api/init để nạp dữ liệu.</p>`;
-                 return;
-            }
+            if(list.length === 0) return container.innerHTML = '<p>Vui lòng chạy /api/init để nạp menu.</p>';
+            
             container.innerHTML = list.map(p => `
                 <div class="product-card">
-                    <img src="${p.image}" alt="${p.name}" class="product-img">
-                    <span class="product-cat">${p.category || 'Trà sữa'}</span>
+                    <img src="${p.image}" alt="${p.name}" class="product-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3081/3081162.png'">
+                    <span style="color: #999; font-size: 12px; text-transform: uppercase;">${p.category || 'Món ngon'}</span>
                     <h3 class="product-title">${p.name}</h3>
                     <div class="product-price">${p.price.toLocaleString()}đ</div>
-                    <button class="add-to-cart-btn" onclick="addToCart('${p._id}')">
-                        <i class="fas fa-plus"></i> Thêm vào giỏ
+                    <button class="add-to-cart-btn" onclick="openToppingModal('${p._id}')">
+                        <i class="fas fa-plus"></i> Chọn món
                     </button>
                 </div>
             `).join('');
         }
 
-        // 4. Thêm vào giỏ hàng
-        function addToCart(id) {
-            const product = products.find(p => p._id === id);
-            cart.push(product);
-            updateCartUI();
-            // Hiệu ứng nhỏ khi thêm
-            const btn = event.target.closest('button');
-            btn.innerHTML = '<i class="fas fa-check"></i> Đã thêm!';
-            btn.style.background = '#48bb78'; btn.style.color = 'white';
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-plus"></i> Thêm vào giỏ';
-                btn.style.background = ''; btn.style.color = '';
-            }, 1000);
-        }
-
-        // 5. Xóa khỏi giỏ hàng
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
-        }
-
-        // 6. Cập nhật giao diện giỏ hàng (số lượng, tổng tiền, danh sách)
-        function updateCartUI() {
-            // Cập nhật số lượng trên nút giỏ hàng
-            document.getElementById('cart-count').innerText = cart.length;
+        // --- LOGIC MODAL TOPPING ---
+        function openToppingModal(id) {
+            currentSelectedProduct = products.find(p => p._id === id);
             
+            // Điền thông tin vào modal
+            document.getElementById('modal-product-name').innerText = currentSelectedProduct.name;
+            document.getElementById('modal-product-price').innerText = currentSelectedProduct.price.toLocaleString() + 'đ';
+            
+            // Render danh sách checkbox topping
+            const toppingContainer = document.getElementById('topping-options');
+            toppingContainer.innerHTML = TOPPINGS.map(t => `
+                <div class="topping-item">
+                    <label class="topping-label">
+                        <input type="checkbox" class="topping-checkbox" value="${t.id}" data-price="${t.price}" onchange="updateModalTotal()">
+                        <span>${t.name}</span>
+                    </label>
+                    <span style="font-weight: bold;">+${t.price.toLocaleString()}đ</span>
+                </div>
+            `).join('');
+
+            updateModalTotal(); // Tính giá khởi điểm
+            document.getElementById('toppingModal').style.display = 'flex';
+        }
+
+        function closeToppingModal() {
+            document.getElementById('toppingModal').style.display = 'none';
+            currentSelectedProduct = null;
+        }
+
+        function updateModalTotal() {
+            if (!currentSelectedProduct) return;
+            let total = currentSelectedProduct.price;
+            
+            // Cộng tiền các topping được tick
+            const checkboxes = document.querySelectorAll('.topping-checkbox:checked');
+            checkboxes.forEach(cb => {
+                total += parseInt(cb.getAttribute('data-price'));
+            });
+            
+            document.getElementById('modal-total-price').innerText = total.toLocaleString();
+        }
+
+        function confirmAddToCart() {
+            if (!currentSelectedProduct) return;
+
+            // Lấy danh sách topping đã chọn
+            const selectedToppings = [];
+            let toppingsPrice = 0;
+            const checkboxes = document.querySelectorAll('.topping-checkbox:checked');
+            
+            checkboxes.forEach(cb => {
+                const t = TOPPINGS.find(item => item.id === cb.value);
+                selectedToppings.push(t);
+                toppingsPrice += t.price;
+            });
+
+            // Tạo item trong giỏ hàng
+            const cartItem = {
+                ...currentSelectedProduct,
+                toppings: selectedToppings,
+                finalPrice: currentSelectedProduct.price + toppingsPrice,
+                uniqueId: Date.now() // Để phân biệt các món giống nhau nhưng khác topping
+            };
+
+            cart.push(cartItem);
+            updateCartUI();
+            closeToppingModal();
+            toggleCart(true); // Mở giỏ hàng cho khách thấy
+        }
+
+        // --- LOGIC GIỎ HÀNG (CẬP NHẬT) ---
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
             const container = document.getElementById('cart-items-list');
-            const summarySection = document.getElementById('cart-summary-section');
+            const summary = document.getElementById('cart-summary-section');
             
             if(cart.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Giỏ hàng đang trống. Hãy chọn món nhé!</p>';
-                summarySection.style.display = 'none'; // Ẩn phần thanh toán
+                container.innerHTML = '<p style="text-align: center; color: #999;">Giỏ hàng trống.</p>';
+                summary.style.display = 'none';
             } else {
-                summarySection.style.display = 'block'; // Hiện phần thanh toán
+                summary.style.display = 'block';
                 let total = 0;
                 container.innerHTML = cart.map((item, index) => {
-                    total += item.price;
+                    total += item.finalPrice;
+                    // Tạo chuỗi hiển thị topping
+                    const toppingString = item.toppings && item.toppings.length > 0 
+                        ? '+ ' + item.toppings.map(t => t.name).join(', ') 
+                        : '';
+
                     return `
                         <div class="cart-item">
                             <div class="cart-item-info">
                                 <h4>${item.name}</h4>
-                                <small class="cart-item-price">${item.price.toLocaleString()}đ</small>
+                                ${toppingString ? `<div class="cart-item-toppings">${toppingString}</div>` : ''}
+                                <div style="color: #ff4757; font-weight: bold; margin-top: 5px;">${item.finalPrice.toLocaleString()}đ</div>
                             </div>
-                            <i class="fas fa-trash-alt remove-btn" onclick="removeFromCart(${index})" title="Xóa món này"></i>
+                            <i class="fas fa-trash-alt" style="color: #999; cursor: pointer;" onclick="removeFromCart(${index})"></i>
                         </div>
                     `;
                 }).join('');
@@ -230,34 +246,29 @@
             }
         }
 
-        // 7. Bật/Tắt Modal giỏ hàng
-        function toggleCart(show) {
-            const modal = document.getElementById('cartModal');
-            modal.style.display = show ? 'flex' : 'none';
-            if(show && cart.length === 0) updateCartUI(); // Cập nhật lại UI nếu mở giỏ trống
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
         }
 
-        // 8. Xử lý Đặt Hàng (Checkout)
+        function toggleCart(show) {
+            document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
+        }
+
         async function checkout() {
             const phone = document.getElementById('cus-phone').value.trim();
             const address = document.getElementById('cus-address').value.trim();
-            const name = document.getElementById('cus-name').value || "Khách vãng lai";
+            const name = document.getElementById('cus-name').value || "Khách";
 
-            // Kiểm tra dữ liệu đầu vào
-            if(cart.length === 0) return alert("Giỏ hàng trống, không thể đặt!");
-            if(!phone) return alert("Vui lòng nhập Số điện thoại!");
-            if(!address) return alert("Vui lòng nhập Địa chỉ nhận hàng!");
+            if(cart.length === 0) return alert("Giỏ hàng trống!");
+            if(!phone || !address) return alert("Vui lòng nhập SĐT và Địa chỉ!");
 
-            // Tạo gói dữ liệu đơn hàng
             const orderData = {
-                customerName: name,
-                phone: phone,
-                address: address,
-                items: cart, // Danh sách các món
-                totalPrice: cart.reduce((sum, item) => sum + item.price, 0)
+                customerName: name, phone, address,
+                items: cart, // Server sẽ lưu cả topping trong array này
+                totalPrice: cart.reduce((sum, item) => sum + item.finalPrice, 0)
             };
 
-            // Gửi lên server
             const btn = document.querySelector('.checkout-btn');
             btn.innerText = "Đang xử lý..."; btn.disabled = true;
 
@@ -268,20 +279,12 @@
                     body: JSON.stringify(orderData)
                 });
                 const result = await res.json();
-                
                 if(result.success) {
-                    alert("✅ Đặt hàng thành công! Shipper sẽ liên hệ bạn sớm.");
-                    cart = []; // Làm trống giỏ
-                    updateCartUI();
-                    toggleCart(false); // Đóng modal
-                } else {
-                    alert("❌ Lỗi: " + result.message);
-                }
-            } catch (err) {
-                alert("Lỗi kết nối server!");
-            } finally {
-                btn.innerText = "ĐẶT HÀNG NGAY"; btn.disabled = false;
-            }
+                    alert("✅ Đặt hàng thành công!");
+                    cart = []; updateCartUI(); toggleCart(false);
+                } else alert("Lỗi: " + result.message);
+            } catch (e) { alert("Lỗi kết nối!"); } 
+            finally { btn.innerText = "ĐẶT HÀNG NGAY"; btn.disabled = false; }
         }
     </script>
 </body>
