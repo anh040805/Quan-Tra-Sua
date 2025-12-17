@@ -53,32 +53,49 @@ const Order = mongoose.model('Order', OrderSchema);
 app.get('/api/init', async (req, res) => {
     // Tạo tài khoản Admin mặc định nếu chưa có
     const adminExist = await User.findOne({ username: 'admin' });
-    if (!adminExist) {
-        await User.create({ username: 'admin', password: '123456', role: 'admin', fullName: 'Chủ Quán' });
-    }
+    if (!adminExist) {
+        await User.create({ username: 'admin', password: '123456', role: 'admin', fullName: 'Chủ Quán' });
+    }
     
     // Tạo Menu và Bàn (như cũ)
-    await Product.deleteMany({});
-    await Product.insertMany([
-        { name: "Sữa Tươi Trân Châu Đường Đen", price: 35000, category: "Best Seller", image: "https://cdn-icons-png.flaticon.com/512/3081/3081162.png" },
-        { name: "Trà Sữa Truyền Thống", price: 30000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/968/968368.png" },
-        { name: "Trà Sữa Thái Xanh", price: 32000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/1149/1149810.png" },
-        { name: "Trà Đào Cam Sả", price: 40000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/931/931949.png" },
-        { name: "Lục Trà Kim Quất Mật Ong", price: 38000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/878/878049.png" },
-        { name: "Trà Vải Hoa Hồng", price: 42000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/2405/2405566.png" },
-        { name: "Matcha Đá Xay", price: 45000, category: "Đá Xay", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" },
-        { name: "Cookie Đá Xay (Oreo)", price: 48000, category: "Đá Xay", image: "https://cdn-icons-png.flaticon.com/512/1848/1848307.png" },
-        { name: "Trà Sữa Khoai Môn", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/2442/2442304.png" },
-        { name: "Sữa Tươi Matcha Nhật Bản", price: 39000, category: "Best Seller", image: "https://cdn-icons-png.flaticon.com/512/3213/3213431.png" }
-    ]);
-    
-    await Table.deleteMany({});
-    const tables = [];
-    for(let i=1; i<=10; i++) tables.push({ name: `Bàn ${i}`, status: 'empty' });
-    await Table.insertMany(tables);
+   await Product.deleteMany({});
+    const newMenu = [
+        // --- NHÓM BEST SELLER ---
+        { name: "Sữa Tươi Trân Châu Đường Đen", price: 35000, category: "Best Seller", image: "https://image.shutterstock.com/image-photo/bubble-tea-brown-sugar-milk-260nw-1915967677.jpg" },
+        { name: "Trà Sữa Nướng", price: 40000, category: "Best Seller", image: "https://media.cooky.vn/recipe/g3/28099/s800x500/cooky-recipe-cover-r28099.jpg" },
+        
+        // --- NHÓM TRÀ SỮA TRUYỀN THỐNG ---
+        { name: "Trà Sữa Truyền Thống", price: 30000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/968/968368.png" },
+        { name: "Trà Sữa Thái Xanh", price: 32000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/1149/1149810.png" },
+        { name: "Trà Sữa Thái Đỏ", price: 32000, category: "Trà Sữa", image: "https://i.pinimg.com/736x/8a/0a/66/8a0a660a92f02672323a6755490c6a5a.jpg" },
+        { name: "Trà Sữa Khoai Môn", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/2442/2442304.png" },
+        { name: "Trà Sữa Socola", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/3081/3081162.png" },
+        { name: "Trà Sữa Matcha", price: 35000, category: "Trà Sữa", image: "https://cdn-icons-png.flaticon.com/512/3213/3213431.png" },
 
-    res.send("Đã khởi tạo: Admin (mk: 123456), Menu và Bàn!");
+        // --- NHÓM TRÀ TRÁI CÂY TƯƠI MÁT ---
+        { name: "Trà Đào Cam Sả", price: 40000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/931/931949.png" },
+        { name: "Lục Trà Kim Quất Mật Ong", price: 38000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/878/878049.png" },
+        { name: "Trà Vải Hoa Hồng", price: 42000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/2405/2405566.png" },
+        { name: "Trà Dâu Tằm Pha Lê", price: 45000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/1135/1135898.png" },
+        { name: "Trà Ổi Hồng Muối Ớt", price: 38000, category: "Trà Trái Cây", image: "https://cdn-icons-png.flaticon.com/512/2860/2860822.png" },
+
+        // --- NHÓM MACCHIATO & LATTE ---
+        { name: "Hồng Trà Macchiato", price: 35000, category: "Macchiato", image: "https://cdn-icons-png.flaticon.com/512/2405/2405451.png" },
+        { name: "Lục Trà Kem Cheese", price: 38000, category: "Macchiato", image: "https://cdn-icons-png.flaticon.com/512/1848/1848307.png" },
+        { name: "Sữa Tươi Cacao Dầm", price: 35000, category: "Latte", image: "https://cdn-icons-png.flaticon.com/512/3058/3058995.png" }
+    ];
+    
+    await Product.insertMany(newMenu);
+    
+    // 3. Reset Bàn (Giữ nguyên)
+    await Table.deleteMany({});
+    const tables = [];
+    for(let i=1; i<=10; i++) tables.push({ name: `Bàn ${i}`, status: 'empty' });
+    await Table.insertMany(tables);
+
+    res.send("✅ Đã nạp Menu mới (15 món) và Reset hệ thống!");
 });
+
 
 // --- API XÁC THỰC (LOGIN/REGISTER) ---
 app.post('/api/login', async (req, res) => {
